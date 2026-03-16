@@ -1,5 +1,4 @@
 import math
-import datetime
 
 # Anomaly B (Loitering & Transfers): 
 # Detect two distinct, valid MMSI numbers located within 500 meters of each other, 
