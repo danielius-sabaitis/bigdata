@@ -2,10 +2,8 @@ from datetime import datetime
 import csv
 import math
 
-# This module defines the chunk reader that reads the input CSV file in chunks, 
-# performs basic data validation, and yields the data for the worker.
-
 def chunk_reader(input_path, chunksize=50000):
+    """Reads the input CSV file in chunks, performs basic data validation, and yields the data for the worker."""
     with open(input_path, encoding="utf-8") as file:
         reader = csv.DictReader(file)
 
