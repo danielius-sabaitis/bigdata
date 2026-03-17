@@ -6,7 +6,6 @@ import time
 import psutil
 import csv
 
-# The main module that controls the pipeline. 
 # Aggregate results are written to a final CSV file after processing all chunks.
 # Chunk size and number of workers can be adjusted to tune performance and later create graphics.
 
@@ -14,9 +13,12 @@ INPUT_PATH = ["aisdk-2025-04-22/aisdk-2025-04-22.csv"]
 CHUNK_SIZE = 50000
 WORKERS = 4
 
-def fix_mb (value): return value/(1024*1024) 
+def fix_mb (value): 
+    """This is a helper function to get megabytes from bytes."""
+    return value/(1024*1024) 
 
 def main():
+    """Main function that controls the reading, processing, and aggregating final results."""
     process = psutil.Process()
     start = time.perf_counter()
     max_mem = 0
