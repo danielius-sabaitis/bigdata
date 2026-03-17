@@ -11,6 +11,7 @@ LOITERING_DURATION = 2*3600 # Seconds
 # Needs to inclue the distance check between two vessels, so only checks loitering for one vessel.
 
 def loitering_check(track):
+    """Checks if the vessel is moving at a slow speed for an extended period."""
     start_time = None
 
     for timestamp, lat, lon, sog, draught in track:
