@@ -1,11 +1,10 @@
 from collections import defaultdict
 import anomaly_B
 
-# This module defines the worker function that processes chunks and checks for anomalies.
-
 ANOMALY_CHECKS = {"B": anomaly_B.loitering_check}
 
 def process_chunk(task):
+    """Processes a chunk of data, performs anomaly checks, and returns the results."""
     chunk_index, rows = task
     vessels = defaultdict(list)
 
@@ -26,4 +25,3 @@ def process_chunk(task):
         results[mmsi] = anomalies
 
     return {"chunk": chunk_index, "vessels": results}
-
