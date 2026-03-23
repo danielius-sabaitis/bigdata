@@ -37,4 +37,3 @@ def chunk_reader(input_path: str, chunksize: int = 50000, overlap_rows: int = 20
                 chunk_start = file.tell()
                 rows_in_chunk = 0
                 recent_lines.clear()
-                
