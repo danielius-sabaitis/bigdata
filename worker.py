@@ -21,7 +21,6 @@ INVALID_MMSI_VALUES = {"000000000",
                        "123456789",}
 
 def is_valid_mmsi(mmsi):
-    """Checks MMSI validity"""
     if not mmsi:
         return False
     normalized = mmsi.strip()
@@ -32,7 +31,7 @@ def is_valid_mmsi(mmsi):
     return True
 
 def iter_range_lines(file_obj, end_pos, header, carryover_rows):
-    """Yields header row, carryover rows, and rows from the file ."""
+    """Yields header, carryover rows, and rows from the file."""
     yield header
     for row in carryover_rows:
         yield row
@@ -65,8 +64,10 @@ def process_chunk(task):
             if not is_valid_mmsi(mmsi): # Skip rows with invalid MMSI
                 continue
 
-            timestamp = parse_timestamp(row["Timestamp"], "%d/%m/%Y %H:%M:%S")
+            mmsi = mmsi.strip()
+
             try: # Try to safely parse the columns
+                timestamp = parse_timestamp(row["Timestamp"], "%d/%m/%Y %H:%M:%S")
                 lat = float(row["Latitude"])
                 lon = float(row["Longitude"])
                 sog = float(row["SOG"]) if row["SOG"] else math.nan
@@ -85,16 +86,20 @@ def process_chunk(task):
         track.sort(key=lambda x: x[0])  # Sort by timestamp.
         
     for mmsi, track in vessels.items():
-        anomalies = {"A":0, 
-                     "B":0, 
-                     "C":0, 
-                     "D":0}
+        # going_dark = anomaly_A.going_dark_check(track)
+        loitering = anomaly_B.loitering_check(track)
+        # impossible_jumps = anomaly_C.impossible_jumps_check(track)
+        # draught_changes = anomaly_D.draught_changes_check(track)
 
-        # Generalized anomaly checks loop, just add to dictionary and import.
-        for category, check_function in ANOMALY_CHECKS.items():
-            if check_function(track):
-                anomalies[category] += 1
+        anomalies = {"A":0, #going_dark, 
+                     "B":loitering, 
+                     "C":0, #impossible_jumps, 
+                     "D":0, # draught_changes,
+        }
 
-        results[mmsi] = anomalies
+        results[mmsi] = {"anomalies": anomalies,
+                         "max_gap_hours": 0.0, # Placeholder for max gap hours, this will be needed for DFSI score
+                        "impossible_jumps_nm": 0.0, # Placeholder for impossible jump distance in nautical miles, will be needed for DFSI score
+                        }
 
     return {"chunk": chunk_index, "vessels": results}
