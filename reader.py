@@ -1,40 +1,40 @@
-from datetime import datetime
-import csv
-import math
+from collections import deque
+from typing import Iterator, List, Tuple
 
-def chunk_reader(input_path, chunksize=50000):
-    """Reads the input CSV file in chunks, performs basic data validation, and yields the data for the worker."""
-    with open(input_path, encoding="utf-8") as file:
-        reader = csv.DictReader(file)
+chunk_task = Tuple[int, str, int, int, str, List[str]]
 
-        if reader.fieldnames and reader.fieldnames[0].startswith("#"):
-            reader.fieldnames[0] = reader.fieldnames[0].lstrip("#").strip() # Remove the "#" and whitespace from the first column name.
-
-        chunk = []
+def chunk_reader(input_path: str, chunksize: int = 50000, overlap_rows: int = 2000) -> Iterator[chunk_task]:
+    """Reads the input CSV file in chunks and creates tasks for workers."""
+    with open(input_path, "rb") as file:
+        header_bytes = file.readline()
+        if not header_bytes:
+            return
+        
+        header = header_bytes.decode("utf-8")
         chunk_index = 0
-        parse_timestamp = datetime.strptime
+        chunk_start = file.tell()
+        rows_in_chunk = 0
 
-        for row in reader:
-            mmsi = row["MMSI"]
-            if not mmsi: # Skip rows with possibly missing MMSI.
-                continue
-
-            timestamp = parse_timestamp(row["Timestamp"], "%d/%m/%Y %H:%M:%S") # Change the format for easier sorting.
-            lat = float(row["Latitude"]) 
-            lon = float(row["Longitude"]) 
-            sog = float(row["SOG"]) if row["SOG"] else math.nan # There are NaN values in the column, so adjust if needed.  
-            draught = float(row["Draught"]) if row["Draught"] else math.nan # There are NaN values in the column, so adjust if needed.
-
-            if not (-90 <= lat <= 90) or not (-180 <= lon <= 180): # Coordinates validation logic
-                continue
-
-            chunk.append((mmsi, timestamp, lat, lon, sog, draught))
+        carryover_rows: List[str] = [] # Saves the last rows of previous chunk for overlap.
+        recent_lines = deque(maxlen=max(0, overlap_rows)) # Keeps track of the most recent rows for overlap.
+        
+        while True:
+            line = file.readline()
+            if not line:
+                if rows_in_chunk > 0:
+                    chunk_index += 1
+                    yield chunk_index, input_path, chunk_start, file.tell(), header, carryover_rows
+                break
             
-            if len(chunk) >= chunksize:
+            rows_in_chunk += 1
+            if overlap_rows > 0:
+                recent_lines.append(line.decode("utf-8"))
+
+            if rows_in_chunk >= chunksize:
                 chunk_index += 1
-                yield chunk_index, chunk
-                chunk = []
+                yield chunk_index, input_path, chunk_start, file.tell(), header, carryover_for_chunk
+                carryover_for_chunk = list(recent_lines) if overlap_rows > 0 else []
+                chunk_start = file.tell()
+                rows_in_chunk = 0
+                recent_lines.clear()
                 
-        if chunk:
-            chunk_index += 1
-            yield chunk_index, chunk
