@@ -32,8 +32,8 @@ def chunk_reader(input_path: str, chunksize: int = 50000, overlap_rows: int = 20
 
             if rows_in_chunk >= chunksize:
                 chunk_index += 1
-                yield chunk_index, input_path, chunk_start, file.tell(), header, carryover_for_chunk
-                carryover_for_chunk = list(recent_lines) if overlap_rows > 0 else []
+                yield chunk_index, input_path, chunk_start, file.tell(), header, carryover_rows
+                carryover_rows = list(recent_lines) if overlap_rows > 0 else []
                 chunk_start = file.tell()
                 rows_in_chunk = 0
                 recent_lines.clear()
