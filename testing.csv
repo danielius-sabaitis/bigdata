@@ -2,10 +2,13 @@
 22/04/2025 00:00:00,Class A,636022441,55.059695,5.366513,Under way using engine,0.0,10.6,208.0,207.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
 22/04/2025 00:00:00,Base Station,2190064,56.716565,11.519032,Unknown value,nan,nan,nan,nan,Unknown,Unknown,nan,Undefined,nan,nan,nan,GPS,nan,Unknown,nan,AIS,nan,nan,nan,nan
 22/04/2025 00:00:00,Base Station,2194005,56.34425,4.272,Unknown value,nan,nan,nan,nan,Unknown,Unknown,nan,Undefined,nan,nan,nan,Surveyed,nan,Unknown,nan,AIS,nan,nan,nan,nan
-22/04/2025 00:00:00,Class A,219016759,56.409138,10.925538,Under way using engine,nan,0.6,334.2,nan,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 00:00:00,Class B,219016759,56.409138,10.925538,Under way using engine,nan,0.6,334.2,nan,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
 22/04/2025 00:00:00,Base Station,2194006,55.53887,5.0332,Unknown value,nan,nan,nan,nan,Unknown,Unknown,nan,Undefined,nan,nan,nan,Surveyed,nan,Unknown,nan,AIS,nan,nan,nan,nan
 22/04/2025 00:00:00,Base Station,2194005,56.34425,4.272,Unknown value,nan,nan,nan,nan,Unknown,Unknown,nan,Undefined,nan,nan,nan,Surveyed,nan,Unknown,nan,AIS,nan,nan,nan,nan
-22/04/2025 00:00:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,0.5,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
-22/04/2025 03:00:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,0.5,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
-22/04/2025 06:00:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,0.5,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
-22/04/2025 08:00:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,0.5,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 00:00:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,1.1,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 03:00:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,0.4,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 03:30:00,Class A,261268000,64.825213,28.871977,Under way using engine,0.5,0.5,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 03:30:00,Class A,261268000,64.825213,28.871977,Under way using engine,0.5,0.5,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 08:00:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,2,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 09:59:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,0.2,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 13:00:00,Class A,261268000,56.825213,16.871977,Under way using engine,0.5,0.5,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.75,Unknown,nan,AIS,nan,nan,nan,nan
