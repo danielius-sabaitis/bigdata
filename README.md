@@ -32,4 +32,4 @@ Results are saved to *final_results.csv*.
 ---
 Group members:
 - Justina Pečiulytė
-- 
+- Danielius Sabaitis
