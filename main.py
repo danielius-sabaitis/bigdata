@@ -9,7 +9,7 @@ import csv
 # Aggregate results are written to a final CSV file after processing all chunks.
 # Chunk size and number of workers can be adjusted to tune performance and later create graphics.
 
-INPUT_PATH = ["aisdk-2025-04-22/aisdk-2025-04-22.csv"]
+INPUT_PATH = ["PATH"]
 CHUNK_SIZE = 50000
 WORKERS = 4
 
@@ -17,20 +17,42 @@ def fix_mb (value):
     """This is a helper function to get megabytes from bytes."""
     return value/(1024*1024) 
 
+def get_memory_snapshot(main_process):
+    """Returns main RSS, total RSS (main + workers), and max single worker RSS in bytes."""
+    main_rss = main_process.memory_info().rss
+    total_rss = main_rss
+    max_worker_rss = 0
+
+    for worker in main_process.workers(recursive=True):
+        try:
+            worker_rss = worker.memory_info().rss
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
+        total_rss += worker_rss
+        max_worker_rss = max(max_worker_rss, worker_rss)
+
+    return main_rss, total_rss, max_worker_rss
+
 def main(input_path=INPUT_PATH,
          chunk_size=CHUNK_SIZE,
          workers=WORKERS,
          output_path="final_results.csv",
-         progress_interval=10,):
+         progress_interval=25):
     """Main function that controls the reading, processing, and aggregating final results."""
+    print(f"Starting pipeline with {workers} workers \n---------------------------------")
+
     process = psutil.Process()
     start = time.perf_counter()
-    max_mem = 0
+    max_main_mem = 0
+    max_total_mem = 0
+    max_single_worker_mem = 0
     global_results = defaultdict(lambda: {"A":0, 
                                           "B":0, 
                                           "C":0, 
                                           "D":0,
                                           "max_gap_hrs":0.0, # Will be needed for DFSI score
+                                          "illicit_draught_changes":0.0, # Will be needed for DFSI score
                                           "impossible_jumps_nm": 0.0,}) # Will be needed for DFSI score
 
     for file in input_path:
@@ -38,10 +60,12 @@ def main(input_path=INPUT_PATH,
         
         with Pool(workers) as pool:
             for result in pool.imap_unordered(process_chunk, chunks):
-                mem_rss = process.memory_info().rss
-                max_mem = max(max_mem, mem_rss)
+                main_rss, total_rss, max_worker_rss = get_memory_snapshot(process)
+                max_main_mem = max(max_main_mem, main_rss)
+                max_total_mem = max(max_total_mem, total_rss)
+                max_single_worker_mem = max(max_single_worker_mem, max_worker_rss)
                 if result["chunk"] % progress_interval == 0: # To save time and console space, it prints a progress message every XX chunks, adjust if needed..
-                    print(f"Chunk {result['chunk']} processed | RAM: {fix_mb(mem_rss):.2f} MB")
+                    print(f"Chunk {result['chunk']} processed | Main RAM: {fix_mb(main_rss):.2f} MB | Total RAM: {fix_mb(total_rss):.2f} MB")
 
                 for mmsi, vessel_results in result["vessels"].items():
                     anomalies = vessel_results["anomalies"]
@@ -50,6 +74,7 @@ def main(input_path=INPUT_PATH,
                         global_results[mmsi][category] += count
 
                     global_results[mmsi]["max_gap_hrs"] = max(global_results[mmsi]["max_gap_hrs"], vessel_results["max_gap_hours"],)
+                    global_results[mmsi]["illicit_draught_changes"] += vessel_results.get("draught_changes", 0.0)
                     global_results[mmsi]["impossible_jumps_nm"] += vessel_results.get("impossible_jumps_nm", 0.0)
 
     scored_rows = []
@@ -62,6 +87,7 @@ def main(input_path=INPUT_PATH,
                             "C": metrics["C"],
                             "D": metrics["D"],
                             "Max_Gap_Hrs": metrics["max_gap_hrs"],
+                            "Illicit_Draught_Changes": metrics["illicit_draught_changes"],
                             "Impossible_Jumps_Nm": metrics["impossible_jumps_nm"],
                             "DFSI_Score": dfsi,})
         
@@ -69,7 +95,7 @@ def main(input_path=INPUT_PATH,
 
     with open(output_path, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["MMSI", "A", "B", "C", "D", "Max_Gap_Hrs", "Impossible_Jumps_Nm", "DFSI_Score"])
+        writer.writerow(["MMSI", "A", "B", "C", "D", "Max_Gap_Hrs", "Illicit_Draught_Changes", "Impossible_Jumps_Nm", "DFSI_Score"])
         for row in scored_rows:
             writer.writerow([row["MMSI"], 
                              row["A"], 
@@ -77,6 +103,7 @@ def main(input_path=INPUT_PATH,
                              row["C"], 
                              row["D"], 
                              f"{row['Max_Gap_Hrs']:.4f}", 
+                             f"{row['Illicit_Draught_Changes']:.4f}", 
                              f"{row['Impossible_Jumps_Nm']:.4f}", 
                              f"{row['DFSI_Score']:.4f}"])
 
@@ -85,7 +112,9 @@ def main(input_path=INPUT_PATH,
     total_time = time.perf_counter() - start
 
     print(f"\nFinished in {total_time:.2f}s")
-    print(f"Peak RAM usage: {fix_mb(max_mem):.2f} MB")
+    print(f"Peak main RAM usage: {fix_mb(max_main_mem):.2f} MB")
+    print(f"Peak total RAM usage (main + workers): {fix_mb(max_total_mem):.2f} MB")
+    print(f"Peak single worker RAM usage: {fix_mb(max_single_worker_mem):.2f} MB")
     print(f"Total vessels processed: {total_vessels}")
 
 if __name__ == "__main__":
