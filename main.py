@@ -23,7 +23,7 @@ def get_memory_snapshot(main_process):
     total_rss = main_rss
     max_worker_rss = 0
 
-    for worker in main_process.workers(recursive=True):
+    for worker in main_process.children(recursive=True):
         try:
             worker_rss = worker.memory_info().rss
         except (psutil.NoSuchProcess, psutil.AccessDenied):
