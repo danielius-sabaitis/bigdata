@@ -5,8 +5,9 @@ import math
 # import anomaly_A
 import anomaly_B
 import anomaly_C
-# import anomaly_D
+import anomaly_D
 
+# is this relevant since we do separate later?
 ANOMALY_CHECKS = {"B": anomaly_B.loitering_check, 
                   "C": anomaly_C.draught_changes_check}
 
@@ -104,17 +105,18 @@ def process_chunk(task):
         loitering = anomaly_B.loitering_check(track)
         draught_changes = anomaly_C.draught_changes_check(track)
         # impossible_jump_distance_nm = anomaly_D.impossible_jumps_check(track)
+        has_anomaly_d, impossible_jump_nm = anomaly_D.impossible_jumps_check(track) 
 
         anomalies = {"A":0, #going_dark, 
                      "B":loitering, 
                      "C":draught_changes,
-                     "D":0, #impossible_jumps,
+                     "D":has_anomaly_d, 
         }
 
         results[mmsi] = {"anomalies": anomalies,
                          "max_gap_hours": 0.0, # Placeholder for max gap hours, this will be needed for DFSI score
                          "draught_changes": draught_changes, 
-                         "impossible_jumps_nm": 0.0, # Placeholder for impossible jump distance in nautical miles, this will be needed for DFSI score
+                         "impossible_jumps_nm": impossible_jump_nm, 
                         }
 
     return {"chunk": chunk_index, "vessels": results}
