@@ -51,7 +51,7 @@ def main(input_path=INPUT_PATH,
                                           "B":0, 
                                           "C":0, 
                                           "D":0,
-                                          "max_gap_hrs":0.0, # Will be needed for DFSI score
+                                          "max_gap_hours":0.0, # Will be needed for DFSI score
                                           "illicit_draught_changes":0.0, # Will be needed for DFSI score
                                           "impossible_jumps_nm": 0.0,}) # Will be needed for DFSI score
 
