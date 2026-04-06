@@ -20,7 +20,7 @@ def draught_changes_check(track):
 
         time_diff_hours = (t2 - t1).total_seconds() / 3600.0
         if time_diff_hours > AIS_BLACKOUT_THRESHOLD and not math.isnan(draught1) and not math.isnan(draught2):
-            if abs(draught2 - draught1) / max(draught1, draught2) > DRAUGHT_CHANGE_THRESHOLD:
+            if draught1 > 0 and abs(draught2 - draught1) / draught1 > DRAUGHT_CHANGE_THRESHOLD:
                 significant_changes += 1
 
     return significant_changes
