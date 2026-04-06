@@ -2,14 +2,10 @@ from collections import defaultdict
 from datetime import datetime
 import csv
 import math
-# import anomaly_A
+import anomaly_A
 import anomaly_B
 import anomaly_C
 import anomaly_D
-
-# is this relevant since we do separate later?
-ANOMALY_CHECKS = {"B": anomaly_B.loitering_check, 
-                  "C": anomaly_C.draught_changes_check}
 
 INVALID_MMSI_VALUES = {"000000000",
                        "111111111",
@@ -101,20 +97,19 @@ def process_chunk(task):
         track.sort(key=lambda x: x[0])  # Sort by timestamp.
         
     for mmsi, track in vessels.items():
-        # going_dark = anomaly_A.going_dark_check(track)
+        going_dark, max_gap_hours = anomaly_A.going_dark_check(track)
         loitering = anomaly_B.loitering_check(track)
         draught_changes = anomaly_C.draught_changes_check(track)
-        # impossible_jump_distance_nm = anomaly_D.impossible_jumps_check(track)
         has_anomaly_d, impossible_jump_nm = anomaly_D.impossible_jumps_check(track) 
 
-        anomalies = {"A":0, #going_dark, 
+        anomalies = {"A":going_dark, 
                      "B":loitering, 
                      "C":draught_changes,
                      "D":has_anomaly_d, 
         }
 
         results[mmsi] = {"anomalies": anomalies,
-                         "max_gap_hours": 0.0, # Placeholder for max gap hours, this will be needed for DFSI score
+                         "max_gap_hours": max_gap_hours,
                          "draught_changes": draught_changes, 
                          "impossible_jumps_nm": impossible_jump_nm, 
                         }
