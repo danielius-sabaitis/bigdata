@@ -72,21 +72,23 @@ def main(input_path=INPUT_PATH,
 
                     for category, count in anomalies.items():
                         global_results[mmsi][category] += count
-
-                    global_results[mmsi]["max_gap_hrs"] = max(global_results[mmsi]["max_gap_hrs"], vessel_results["max_gap_hours"],)
+                        
+                    global_results[mmsi]["max_gap_hours"] = max(
+                            global_results[mmsi]["max_gap_hours"],
+                            vessel_results.get("max_gap_hours", 0.0),) 
                     global_results[mmsi]["illicit_draught_changes"] += vessel_results.get("draught_changes", 0.0)
                     global_results[mmsi]["impossible_jumps_nm"] += vessel_results.get("impossible_jumps_nm", 0.0)
 
     scored_rows = []
     for mmsi, metrics in global_results.items():
-        dfsi = (metrics["max_gap_hrs"] / 2.0 + metrics["impossible_jumps_nm"] / 10.0 + metrics["C"] * 15)
+        dfsi = (metrics["max_gap_hours"] / 2.0 + metrics["impossible_jumps_nm"] / 10.0 + metrics["illicit_draught_changes"] * 15)
 
         scored_rows.append({"MMSI": mmsi,
                             "A": metrics["A"],
                             "B": metrics["B"],
                             "C": metrics["C"],
                             "D": metrics["D"],
-                            "Max_Gap_Hrs": metrics["max_gap_hrs"],
+                            "Max_Gap_Hrs": metrics["max_gap_hours"],
                             "Illicit_Draught_Changes": metrics["illicit_draught_changes"],
                             "Impossible_Jumps_Nm": metrics["impossible_jumps_nm"],
                             "DFSI_Score": dfsi,})
