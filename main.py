@@ -9,7 +9,8 @@ import csv
 # Aggregate results are written to a final CSV file after processing all chunks.
 # Chunk size and number of workers can be adjusted to tune performance and later create graphics.
 
-INPUT_PATH = ["PATH"]
+INPUT_PATH = ["./aisdk-2025-04-22/aisdk-2025-04-22.csv",
+              "./aisdk-2025-04-23/aisdk-2025-04-23.csv"]
 CHUNK_SIZE = 50000
 WORKERS = 4
 
@@ -51,9 +52,10 @@ def main(input_path=INPUT_PATH,
                                           "B":0, 
                                           "C":0, 
                                           "D":0,
-                                          "max_gap_hours":0.0, # Will be needed for DFSI score
-                                          "illicit_draught_changes":0.0, # Will be needed for DFSI score
-                                          "impossible_jumps_nm": 0.0,}) # Will be needed for DFSI score
+                                          "max_gap_hours":0.0, 
+                                          "max_gap_event": None,
+                                          "illicit_draught_changes":0.0, 
+                                          "impossible_jumps_nm": 0.0,}) 
 
     for file in input_path:
         chunks = chunk_reader(file, chunk_size, overlap_rows=2000)
@@ -73,9 +75,10 @@ def main(input_path=INPUT_PATH,
                     for category, count in anomalies.items():
                         global_results[mmsi][category] += count
                         
-                    global_results[mmsi]["max_gap_hours"] = max(
-                            global_results[mmsi]["max_gap_hours"],
-                            vessel_results.get("max_gap_hours", 0.0),) 
+                    vessel_max_gap = vessel_results.get("max_gap_hours", 0.0)
+                    if vessel_max_gap > global_results[mmsi]["max_gap_hours"]:
+                        global_results[mmsi]["max_gap_hours"] = vessel_max_gap
+                        global_results[mmsi]["max_gap_event"] = vessel_results.get("max_gap_event")
                     global_results[mmsi]["illicit_draught_changes"] += vessel_results.get("draught_changes", 0.0)
                     global_results[mmsi]["impossible_jumps_nm"] += vessel_results.get("impossible_jumps_nm", 0.0)
 
@@ -89,6 +92,7 @@ def main(input_path=INPUT_PATH,
                             "C": metrics["C"],
                             "D": metrics["D"],
                             "Max_Gap_Hrs": metrics["max_gap_hours"],
+                            "Max_Gap_Event": metrics["max_gap_event"],
                             "Illicit_Draught_Changes": metrics["illicit_draught_changes"],
                             "Impossible_Jumps_Nm": metrics["impossible_jumps_nm"],
                             "DFSI_Score": dfsi,})
@@ -110,6 +114,14 @@ def main(input_path=INPUT_PATH,
                              f"{row['DFSI_Score']:.4f}"])
 
     top5 = scored_rows[:5] # Get top 5 suspicious vessels by DFSI
+    with open("top_suspicious_vessels.csv", "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["MMSI", "DFSI_Score", "Max_Gap_Event"])
+        for row in top5:
+            writer.writerow([row["MMSI"],
+                             f"{row['DFSI_Score']:.4f}",
+                             row["Max_Gap_Event"]])
+
     total_vessels = len(global_results) # Just for interest, total number of ships processed.
     total_time = time.perf_counter() - start
 
