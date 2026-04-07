@@ -12,10 +12,13 @@ def impossible_jumps_check(track):
     
     # A ship needs at least 2 pings to calculate speed/distance.
     if len(track) < 2:
-        return 0, 0.0 
+        return 0, 0.0, "No impossible jump" 
 
     impossible_jumps_count = 0
     total_jump_distance_nm = 0.0
+    # Variables to track the worst jump
+    max_single_jump = 0.0
+    worst_jump_event = "No impossible jump"
 
     # Loop through the track, comparing ping 1 to ping 2, ping 2 to ping 3, etc.
     for i in range(1, len(track)):
@@ -44,11 +47,15 @@ def impossible_jumps_check(track):
         speed_knots = distance_nm / time_diff_hours
 
         # 5. Check against the Anomaly D rule (60 knots)
-        if speed_knots > SPEED_THRESHOLD_KNOTS:
+        if speed_knots > SPEED_THRESHOLD_KNOTS and distance_nm > 1.0:
             impossible_jumps_count += 1
             total_jump_distance_nm += distance_nm
+            # Save coordinates only if this is the longest jump
+            if distance_nm > max_single_jump:
+                max_single_jump = distance_nm
+                worst_jump_event = f"[{t1}] Lat: {lat1}, Lon: {lon1} ---> [{t2}] Lat: {lat2}, Lon: {lon2} ({distance_nm:.1f} NM)"
 
     # 6. Final Result: If we found at least 1 jump, Anomaly D is triggered
     has_anomaly_d = 1 if impossible_jumps_count > 0 else 0
     
-    return has_anomaly_d, total_jump_distance_nm
+    return has_anomaly_d, total_jump_distance_nm, worst_jump_event
