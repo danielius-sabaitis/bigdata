@@ -95,8 +95,8 @@ def process_chunk(task):
 
     for mmsi, track in vessels.items():
         track.sort(key=lambda x: x[0])  # Sort by timestamp.
-
-    # --- Pairwise loitering detection (Anomaly B) ---
+        
+ # --- Pairwise loitering detection (Anomaly B) ---
     pairwise_loitering = {}
     mmsis = list(vessels.keys())
 
@@ -106,15 +106,15 @@ def process_chunk(task):
             m2 = mmsis[j]
             if anomaly_B.loitering_check(vessels[m1], vessels[m2]):
                 pairwise_loitering[(m1, m2)] = True
-  
+
     for mmsi, track in vessels.items():
         going_dark, max_gap_hours, max_gap_event = anomaly_A.going_dark_check(track)
         loitering = any(
             mmsi == m1 or mmsi == m2
             for (m1, m2) in pairwise_loitering
-        )  
+        ) 
         draught_changes = anomaly_C.draught_changes_check(track)
-        has_anomaly_d, impossible_jump_nm = anomaly_D.impossible_jumps_check(track) 
+        has_anomaly_d, impossible_jump_nm, worst_jump_event = anomaly_D.impossible_jumps_check(track) 
 
         anomalies = {"A":going_dark, 
                      "B":loitering, 
@@ -127,6 +127,7 @@ def process_chunk(task):
                          "max_gap_event": max_gap_event, 
                          "draught_changes": draught_changes, 
                          "impossible_jumps_nm": impossible_jump_nm, 
+                         "worst_jump_event": worst_jump_event
                         }
 
     return {"chunk": chunk_index, "vessels": results}
