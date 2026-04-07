@@ -9,6 +9,7 @@ GOING_DARK_THRESHOLD_SECONDS = 4 * 3600
 def going_dark_check(track):
     """Checks for significant gaps between pings where the ship kept moving."""
     max_gap_hours = 0.0
+    max_gap_event = None  # This stores info on the longest gap
     count = 0
 
     for previous, current in zip(track, track[1:]): # Loop through consecutive pings
@@ -29,5 +30,13 @@ def going_dark_check(track):
             count += 1
             if gap_hours > max_gap_hours:
                 max_gap_hours = gap_hours
+                max_gap_event = {"t1": t1, 
+                                 "lat1": lat1, 
+                                 "lon1": lon1, 
+                                 "t2": t2, 
+                                 "lat2": lat2, 
+                                 "lon2": lon2, 
+                                 "gap_hours": gap_hours, 
+                                 "distance_nm": distance_nm}
 
-    return count, max_gap_hours
+    return count, max_gap_hours, max_gap_event
