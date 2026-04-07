@@ -9,8 +9,7 @@ import csv
 # Aggregate results are written to a final CSV file after processing all chunks.
 # Chunk size and number of workers can be adjusted to tune performance and later create graphics.
 
-INPUT_PATH = ["./aisdk-2025-04-22/aisdk-2025-04-22.csv",
-              "./aisdk-2025-04-23/aisdk-2025-04-23.csv"]
+INPUT_PATH = ["input_path"]
 CHUNK_SIZE = 50000
 WORKERS = 4
 
