@@ -10,6 +10,7 @@ import csv
 # Chunk size and number of workers can be adjusted to tune performance and later create graphics.
 
 INPUT_PATH = ["input_path"]
+
 CHUNK_SIZE = 50000
 WORKERS = 4
 
@@ -40,7 +41,10 @@ def main(input_path=INPUT_PATH,
          output_path="final_results.csv",
          progress_interval=25):
     """Main function that controls the reading, processing, and aggregating final results."""
-    print(f"Starting pipeline with {workers} workers \n---------------------------------")
+    if workers == 0:
+        print("Starting pipeline in sequential mode (workers = 0)\n---------------------------------")
+    else:
+        print(f"Starting pipeline parallel mode (workers = {workers})\n---------------------------------")
 
     process = psutil.Process()
     start = time.perf_counter()
@@ -54,32 +58,41 @@ def main(input_path=INPUT_PATH,
                                           "max_gap_hours":0.0, 
                                           "max_gap_event": None,
                                           "illicit_draught_changes":0.0, 
-                                          "impossible_jumps_nm": 0.0,}) 
+                                          "impossible_jumps_nm": 0.0,})
+
+    def merge_result(result):
+        nonlocal max_main_mem, max_total_mem, max_single_worker_mem
+        main_rss, total_rss, max_worker_rss = get_memory_snapshot(process)
+        max_main_mem = max(max_main_mem, main_rss)
+        max_total_mem = max(max_total_mem, total_rss)
+        max_single_worker_mem = max(max_single_worker_mem, max_worker_rss)
+
+        if result["chunk"] % progress_interval == 0: # To save time and console space, it prints a progress message every XX chunks, adjust if needed..
+            print(f"Chunk {result['chunk']} processed | Main RAM: {fix_mb(main_rss):.2f} MB | Total RAM: {fix_mb(total_rss):.2f} MB")
+
+        for mmsi, vessel_results in result["vessels"].items():
+            anomalies = vessel_results["anomalies"]
+
+            for category, count in anomalies.items():
+                global_results[mmsi][category] += count
+
+            vessel_max_gap = vessel_results.get("max_gap_hours", 0.0)
+            if vessel_max_gap > global_results[mmsi]["max_gap_hours"]:
+                global_results[mmsi]["max_gap_hours"] = vessel_max_gap
+                global_results[mmsi]["max_gap_event"] = vessel_results.get("max_gap_event")
+            global_results[mmsi]["illicit_draught_changes"] += vessel_results.get("draught_changes", 0.0)
+            global_results[mmsi]["impossible_jumps_nm"] += vessel_results.get("impossible_jumps_nm", 0.0)
 
     for file in input_path:
         chunks = chunk_reader(file, chunk_size, overlap_rows=2000)
-        
-        with Pool(workers) as pool:
-            for result in pool.imap_unordered(process_chunk, chunks):
-                main_rss, total_rss, max_worker_rss = get_memory_snapshot(process)
-                max_main_mem = max(max_main_mem, main_rss)
-                max_total_mem = max(max_total_mem, total_rss)
-                max_single_worker_mem = max(max_single_worker_mem, max_worker_rss)
-                if result["chunk"] % progress_interval == 0: # To save time and console space, it prints a progress message every XX chunks, adjust if needed..
-                    print(f"Chunk {result['chunk']} processed | Main RAM: {fix_mb(main_rss):.2f} MB | Total RAM: {fix_mb(total_rss):.2f} MB")
 
-                for mmsi, vessel_results in result["vessels"].items():
-                    anomalies = vessel_results["anomalies"]
-
-                    for category, count in anomalies.items():
-                        global_results[mmsi][category] += count
-                        
-                    vessel_max_gap = vessel_results.get("max_gap_hours", 0.0)
-                    if vessel_max_gap > global_results[mmsi]["max_gap_hours"]:
-                        global_results[mmsi]["max_gap_hours"] = vessel_max_gap
-                        global_results[mmsi]["max_gap_event"] = vessel_results.get("max_gap_event")
-                    global_results[mmsi]["illicit_draught_changes"] += vessel_results.get("draught_changes", 0.0)
-                    global_results[mmsi]["impossible_jumps_nm"] += vessel_results.get("impossible_jumps_nm", 0.0)
+        if workers == 0:
+            for result in map(process_chunk, chunks):
+                merge_result(result)
+        else:
+            with Pool(workers) as pool:
+                for result in pool.imap_unordered(process_chunk, chunks):
+                    merge_result(result)
 
     scored_rows = []
     for mmsi, metrics in global_results.items():
@@ -90,7 +103,7 @@ def main(input_path=INPUT_PATH,
                             "B": metrics["B"],
                             "C": metrics["C"],
                             "D": metrics["D"],
-                            "Max_Gap_Hrs": metrics["max_gap_hours"],
+                            "Max_Gap_Hours": metrics["max_gap_hours"],
                             "Max_Gap_Event": metrics["max_gap_event"],
                             "Illicit_Draught_Changes": metrics["illicit_draught_changes"],
                             "Impossible_Jumps_Nm": metrics["impossible_jumps_nm"],
@@ -100,14 +113,14 @@ def main(input_path=INPUT_PATH,
 
     with open(output_path, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["MMSI", "A", "B", "C", "D", "Max_Gap_Hrs", "Illicit_Draught_Changes", "Impossible_Jumps_Nm", "DFSI_Score"])
+        writer.writerow(["MMSI", "A", "B", "C", "D", "Max_Gap_Hours", "Illicit_Draught_Changes", "Impossible_Jumps_Nm", "DFSI_Score"])
         for row in scored_rows:
             writer.writerow([row["MMSI"], 
                              row["A"], 
                              row["B"], 
                              row["C"], 
                              row["D"], 
-                             f"{row['Max_Gap_Hrs']:.4f}", 
+                             f"{row['Max_Gap_Hours']:.4f}", 
                              f"{row['Illicit_Draught_Changes']:.4f}", 
                              f"{row['Impossible_Jumps_Nm']:.4f}", 
                              f"{row['DFSI_Score']:.4f}"])
@@ -120,7 +133,7 @@ def main(input_path=INPUT_PATH,
             writer.writerow([row["MMSI"],
                              f"{row['DFSI_Score']:.4f}",
                              row["Max_Gap_Event"]])
-
+            
     total_vessels = len(global_results) # Just for interest, total number of ships processed.
     total_time = time.perf_counter() - start
 
