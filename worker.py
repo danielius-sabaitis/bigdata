@@ -98,12 +98,28 @@ def process_chunk(task):
         
  # --- Pairwise loitering detection (Anomaly B) ---
     pairwise_loitering = {}
+    bboxes = {}
+
+    for m, trk in vessels.items():
+        lats = [p[1] for p in trk]
+        lons = [p[2] for p in trk]
+        bboxes[m] = (min(lats) - 0.01, max(lats) + 0.01, min(lons) - 0.01, max(lons) + 0.01)
+
     mmsis = list(vessels.keys())
 
     for i in range(len(mmsis)):
+        m1 = mmsis[i]
+        min_lat1, max_lat1, min_lon1, max_lon1 = bboxes[m1]  # Unpack Ship 1's box
+
         for j in range(i + 1, len(mmsis)):
-            m1 = mmsis[i]
             m2 = mmsis[j]
+            min_lat2, max_lat2, min_lon2, max_lon2 = bboxes[m2]  # Unpack Ship 2's box
+
+            #If the boxes DO NOT overlap, skip it.
+            if (max_lat1 < min_lat2 or min_lat1 > max_lat2 or max_lon1 < min_lon2 or min_lon1 > max_lon2):
+                continue
+
+                #If they DO overlap, perform calculations
             if anomaly_B.loitering_check(vessels[m1], vessels[m2]):
                 pairwise_loitering[(m1, m2)] = True
 
