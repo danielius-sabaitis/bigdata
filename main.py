@@ -44,7 +44,7 @@ def main(input_path=INPUT_PATH,
     if workers == 0:
         print("Starting pipeline in sequential mode (workers = 0)\n---------------------------------")
     else:
-        print(f"Starting pipeline parallel mode (workers = {workers})\n---------------------------------")
+        print(f"Starting pipeline in parallel mode (workers = {workers})\n---------------------------------")
 
     process = psutil.Process()
     start = time.perf_counter()
