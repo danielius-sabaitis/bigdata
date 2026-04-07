@@ -24,7 +24,7 @@ Required data fields for analysis:
 **Project architecture:**
 ---
 
-
+<img src="./project_diagram.drawio.svg">
 
 **Project structure and file descriptions:**
 ---
