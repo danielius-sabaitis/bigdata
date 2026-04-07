@@ -28,7 +28,7 @@ def loitering_check(track1, track2):
             if t1 < t2:
                 i += 1
             else:
-                j += 1:
+                j += 1
             continue
 
         if (sog1 < LOITERING_SPEED_THRESHOLD and
