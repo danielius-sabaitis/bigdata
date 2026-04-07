@@ -97,7 +97,7 @@ def process_chunk(task):
         track.sort(key=lambda x: x[0])  # Sort by timestamp.
         
     for mmsi, track in vessels.items():
-        going_dark, max_gap_hours = anomaly_A.going_dark_check(track)
+        going_dark, max_gap_hours, max_gap_event = anomaly_A.going_dark_check(track)
         loitering = anomaly_B.loitering_check(track)
         draught_changes = anomaly_C.draught_changes_check(track)
         has_anomaly_d, impossible_jump_nm = anomaly_D.impossible_jumps_check(track) 
@@ -110,6 +110,7 @@ def process_chunk(task):
 
         results[mmsi] = {"anomalies": anomalies,
                          "max_gap_hours": max_gap_hours,
+                         "max_gap_event": max_gap_event, 
                          "draught_changes": draught_changes, 
                          "impossible_jumps_nm": impossible_jump_nm, 
                         }
