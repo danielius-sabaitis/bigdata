@@ -12,3 +12,11 @@
 22/04/2025 08:00:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,2,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,nan,Unknown,nan,AIS,nan,nan,nan,nan
 22/04/2025 09:59:00,Class A,261268000,54.825213,10.871977,Under way using engine,0.5,0.2,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
 22/04/2025 13:00:00,Class A,261268000,56.825213,16.871977,Under way using engine,0.5,0.5,357.9,358.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.75,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 00:00:00,Class A,123456780,56.000000,16.000000,Under way using engine,0.0,0.5,100.0,100.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 00:00:00,Class A,123456781,56.000300,16.000300,Under way using engine,0.0,0.4,100.0,100.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 01:00:00,Class A,123456780,56.000000,16.000000,Under way using engine,0.0,0.3,100.0,100.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 01:00:00,Class A,123456781,56.000300,16.000300,Under way using engine,0.0,0.2,100.0,100.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 02:00:00,Class A,123456780,56.000000,16.000000,Under way using engine,0.0,0.2,100.0,100.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 02:00:00,Class A,123456781,56.000300,16.000300,Under way using engine,0.0,0.1,100.0,100.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 03:00:00,Class A,123456780,56.000000,16.000000,Under way using engine,0.0,0.1,100.0,100.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
+22/04/2025 03:00:00,Class A,123456781,56.000300,16.000300,Under way using engine,0.0,0.1,100.0,100.0,Unknown,Unknown,nan,Undefined,nan,nan,nan,Undefined,2.5,Unknown,nan,AIS,nan,nan,nan,nan
