@@ -82,6 +82,10 @@ def main(input_path=INPUT_PATH,
                 global_results[mmsi]["max_gap_event"] = vessel_results.get("max_gap_event")
             global_results[mmsi]["illicit_draught_changes"] += vessel_results.get("draught_changes", 0.0)
             global_results[mmsi]["impossible_jumps_nm"] += vessel_results.get("impossible_jumps_nm", 0.0)
+            # Save the worst jump event string if the ship teleported
+            current_worst = vessel_results.get("worst_jump_event", "No impossible jump")
+            if current_worst != "No impossible jump":
+                global_results[mmsi]["worst_jump_event"] = current_worst
 
     for file in input_path:
         chunks = chunk_reader(file, chunk_size, overlap_rows=2000)
@@ -107,7 +111,8 @@ def main(input_path=INPUT_PATH,
                             "Max_Gap_Event": metrics["max_gap_event"],
                             "Illicit_Draught_Changes": metrics["illicit_draught_changes"],
                             "Impossible_Jumps_Nm": metrics["impossible_jumps_nm"],
-                            "DFSI_Score": dfsi,})
+                            "DFSI_Score": dfsi,
+                            "Worst_Jump_Event": metrics.get("worst_jump_event", "No impossible jump")})
         
     scored_rows.sort(key=lambda x: x["DFSI_Score"], reverse=True)
 
@@ -128,11 +133,12 @@ def main(input_path=INPUT_PATH,
     top5 = scored_rows[:5] # Get top 5 suspicious vessels by DFSI
     with open("top_suspicious_vessels.csv", "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(["MMSI", "DFSI_Score", "Max_Gap_Event"])
+        writer.writerow(["MMSI", "DFSI_Score", "Max_Gap_Event", "Worst_Jump_Event"])
         for row in top5:
             writer.writerow([row["MMSI"],
                              f"{row['DFSI_Score']:.4f}",
-                             row["Max_Gap_Event"]])
+                             row["Max_Gap_Event"],
+                             row["Worst_Jump_Event"]])
             
     total_vessels = len(global_results) # Just for interest, total number of ships processed.
     total_time = time.perf_counter() - start
