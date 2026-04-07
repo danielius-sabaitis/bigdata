@@ -9,6 +9,8 @@ from collections import defaultdict
 LOITERING_SPEED_THRESHOLD = 1  # Knots
 LOITERING_DURATION = 2*3600 # Seconds
 PROXIMITY_METERS = 500
+TIME_TOLERANCE_SECONDS = 300
+
 
 def loitering_check(track1, track2):
     """Detects if two vessels loiter together within 500m for >2 hours."""
@@ -19,12 +21,14 @@ def loitering_check(track1, track2):
         t1, lat1, lon1, sog1, _, _ = track1[i]
         t2, lat2, lon2, sog2, _, _ = track2[j]
 
-        # Sync timestamps
-        if t1 < t2:
-            i += 1
-            continue
-        elif t2 < t1:
-            j += 1
+        # Sync timestamps using a 5-minute tolerance
+        time_diff = abs((t1 - t2).total_seconds())
+        
+        if time_diff > TIME_TOLERANCE_SECONDS:
+            if t1 < t2:
+                i += 1
+            else:
+                j += 1:
             continue
 
         if (sog1 < LOITERING_SPEED_THRESHOLD and
