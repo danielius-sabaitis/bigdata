@@ -95,10 +95,24 @@ def process_chunk(task):
 
     for mmsi, track in vessels.items():
         track.sort(key=lambda x: x[0])  # Sort by timestamp.
-        
+
+    # --- Pairwise loitering detection (Anomaly B) ---
+    pairwise_loitering = {}
+    mmsis = list(vessels.keys())
+
+    for i in range(len(mmsis)):
+        for j in range(i + 1, len(mmsis)):
+            m1 = mmsis[i]
+            m2 = mmsis[j]
+            if anomaly_B.loitering_check(vessels[m1], vessels[m2]):
+                pairwise_loitering[(m1, m2)] = True
+  
     for mmsi, track in vessels.items():
         going_dark, max_gap_hours, max_gap_event = anomaly_A.going_dark_check(track)
-        loitering = anomaly_B.loitering_check(track)
+        loitering = any(
+            mmsi == m1 or mmsi == m2
+            for (m1, m2) in pairwise_loitering
+        )  
         draught_changes = anomaly_C.draught_changes_check(track)
         has_anomaly_d, impossible_jump_nm = anomaly_D.impossible_jumps_check(track) 
 
