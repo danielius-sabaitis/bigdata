@@ -42,9 +42,9 @@ def main(input_path=INPUT_PATH,
          progress_interval=25):
     """Main function that controls the reading, processing, and aggregating final results."""
     if workers == 0:
-        print("Starting pipeline in sequential mode (workers = 0)\n---------------------------------")
+        print("Starting the pipeline in sequential mode (workers = 0)\n--------------------------------------------")
     else:
-        print(f"Starting pipeline in parallel mode (workers = {workers})\n---------------------------------")
+        print(f"Starting the pipeline in parallel mode (workers = {workers})\n--------------------------------------------")
 
     process = psutil.Process()
     start = time.perf_counter()
@@ -57,6 +57,8 @@ def main(input_path=INPUT_PATH,
                                           "D":0,
                                           "max_gap_hours": 0.0, 
                                           "max_gap_event": "No movement during blackouts",
+                                          "max_loitering_duration_s": 0.0,
+                                          "worst_loitering_event": "No loitering event detected",
                                           "max_draught_change_ratio": 0.0,
                                           "worst_draught_change_event": "No anomalous draught change",
                                           "illicit_draught_changes":0.0, 
@@ -82,6 +84,14 @@ def main(input_path=INPUT_PATH,
             if vessel_max_gap > global_results[mmsi]["max_gap_hours"]:
                 global_results[mmsi]["max_gap_hours"] = vessel_max_gap
                 global_results[mmsi]["max_gap_event"] = vessel_results.get("max_gap_event")
+
+            vessel_max_loitering_duration = vessel_results.get("max_loitering_duration_s", 0.0)
+            if vessel_max_loitering_duration > global_results[mmsi]["max_loitering_duration_s"]:
+                global_results[mmsi]["max_loitering_duration_s"] = vessel_max_loitering_duration
+                global_results[mmsi]["worst_loitering_event"] = vessel_results.get(
+                    "worst_loitering_event",
+                    "No loitering event detected",
+                )
 
             vessel_max_draught_change = vessel_results.get("max_draught_change_ratio", 0.0)
             if vessel_max_draught_change > global_results[mmsi]["max_draught_change_ratio"]:
@@ -120,6 +130,7 @@ def main(input_path=INPUT_PATH,
                             "D": metrics["D"],
                             "Max_Gap_Hours": metrics["max_gap_hours"],
                             "Max_Gap_Event": metrics["max_gap_event"],
+                            "Worst_Loitering_Event": metrics.get("worst_loitering_event", "No loitering event detected"),
                             "Illicit_Draught_Changes": metrics["illicit_draught_changes"],
                             "Impossible_Jumps_Nm": metrics["impossible_jumps_nm"],
                             "DFSI_Score": dfsi,
@@ -145,11 +156,12 @@ def main(input_path=INPUT_PATH,
     top5 = scored_rows[:5] # Get top 5 suspicious vessels by DFSI
     with open("top_suspicious_vessels.csv", "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-        writer.writerow(["MMSI", "DFSI_Score", "Max_Gap_Event", "Worst_Draught_Change_Event", "Worst_Jump_Event"])
+        writer.writerow(["MMSI", "DFSI_Score", "Max_Gap_Event", "Worst_Loitering_Event", "Worst_Draught_Change_Event", "Worst_Jump_Event"])
         for row in top5:
             writer.writerow([row["MMSI"],
                              f"{row['DFSI_Score']:.4f}",
                              row["Max_Gap_Event"],
+                             row["Worst_Loitering_Event"],
                              row["Worst_Draught_Change_Event"],
                              row["Worst_Jump_Event"]])
             

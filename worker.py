@@ -97,7 +97,9 @@ def process_chunk(task):
         track.sort(key=lambda x: x[0])  # Sort by timestamp.
         
  # --- Pairwise loitering detection (Anomaly B) ---
-    pairwise_loitering = {}
+    loitering_detected = set()
+    max_loitering_duration = defaultdict(float)
+    worst_loitering_event = defaultdict(lambda: "No loitering event detected")
     bboxes = {}
 
     for m, trk in vessels.items():
@@ -120,15 +122,27 @@ def process_chunk(task):
                 continue
 
                 #If they DO overlap, perform calculations
-            if anomaly_B.loitering_check(vessels[m1], vessels[m2]):
-                pairwise_loitering[(m1, m2)] = True
+            has_loitering, start_time, end_time, loitering_duration, min_distance_m, avg_distance_m = anomaly_B.loitering_check(vessels[m1], vessels[m2])
+            if has_loitering:
+                loitering_detected.add(m1)
+                loitering_detected.add(m2)
+                pair_event = (
+                    f"[{start_time}] ---> [{end_time}] | "
+                    f"(Vessel pair: {m1} & {m2}; Duration: {loitering_duration / 3600.0:.2f} h; "
+                    f"Closest distance: {min_distance_m:.1f} m; Average distance: {avg_distance_m:.1f} m)"
+                )
+
+                if loitering_duration > max_loitering_duration[m1]:
+                    max_loitering_duration[m1] = loitering_duration
+                    worst_loitering_event[m1] = pair_event
+
+                if loitering_duration > max_loitering_duration[m2]:
+                    max_loitering_duration[m2] = loitering_duration
+                    worst_loitering_event[m2] = pair_event
 
     for mmsi, track in vessels.items():
         going_dark, max_gap_hours, max_gap_event = anomaly_A.going_dark_check(track)
-        loitering = any(
-            mmsi == m1 or mmsi == m2
-            for (m1, m2) in pairwise_loitering
-        ) 
+        loitering = mmsi in loitering_detected
         draught_changes, max_draught_change_ratio, worst_draught_change_event = anomaly_C.draught_changes_check(track)
         has_anomaly_d, impossible_jump_nm, worst_jump_event = anomaly_D.impossible_jumps_check(track) 
 
@@ -141,6 +155,8 @@ def process_chunk(task):
         results[mmsi] = {"anomalies": anomalies,
                          "max_gap_hours": max_gap_hours,
                          "max_gap_event": max_gap_event, 
+                         "max_loitering_duration_s": max_loitering_duration[mmsi],
+                         "worst_loitering_event": worst_loitering_event[mmsi],
                          "draught_changes": draught_changes, 
                          "max_draught_change_ratio": max_draught_change_ratio, 
                          "worst_draught_change_event": worst_draught_change_event, 
