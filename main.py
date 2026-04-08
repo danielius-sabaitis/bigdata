@@ -55,8 +55,10 @@ def main(input_path=INPUT_PATH,
                                           "B":0, 
                                           "C":0, 
                                           "D":0,
-                                          "max_gap_hours":0.0, 
-                                          "max_gap_event": None,
+                                          "max_gap_hours": 0.0, 
+                                          "max_gap_event": "No movement during blackout",
+                                          "max_draught_change_ratio": 0.0,
+                                          "worst_draught_change_event": "No anomalous draught change",
                                           "illicit_draught_changes":0.0, 
                                           "impossible_jumps_nm": 0.0,})
 
@@ -80,6 +82,15 @@ def main(input_path=INPUT_PATH,
             if vessel_max_gap > global_results[mmsi]["max_gap_hours"]:
                 global_results[mmsi]["max_gap_hours"] = vessel_max_gap
                 global_results[mmsi]["max_gap_event"] = vessel_results.get("max_gap_event")
+
+            vessel_max_draught_change = vessel_results.get("max_draught_change_ratio", 0.0)
+            if vessel_max_draught_change > global_results[mmsi]["max_draught_change_ratio"]:
+                global_results[mmsi]["max_draught_change_ratio"] = vessel_max_draught_change
+                global_results[mmsi]["worst_draught_change_event"] = vessel_results.get(
+                    "worst_draught_change_event",
+                    "No anomalous draught change",
+                )
+
             global_results[mmsi]["illicit_draught_changes"] += vessel_results.get("draught_changes", 0.0)
             global_results[mmsi]["impossible_jumps_nm"] += vessel_results.get("impossible_jumps_nm", 0.0)
             # Save the worst jump event string if the ship teleported
@@ -112,6 +123,7 @@ def main(input_path=INPUT_PATH,
                             "Illicit_Draught_Changes": metrics["illicit_draught_changes"],
                             "Impossible_Jumps_Nm": metrics["impossible_jumps_nm"],
                             "DFSI_Score": dfsi,
+                            "Worst_Draught_Change_Event": metrics.get("worst_draught_change_event", "No anomalous draught change"),
                             "Worst_Jump_Event": metrics.get("worst_jump_event", "No impossible jump")})
         
     scored_rows.sort(key=lambda x: x["DFSI_Score"], reverse=True)
@@ -132,12 +144,13 @@ def main(input_path=INPUT_PATH,
 
     top5 = scored_rows[:5] # Get top 5 suspicious vessels by DFSI
     with open("top_suspicious_vessels.csv", "w", newline="", encoding="utf-8") as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(["MMSI", "DFSI_Score", "Max_Gap_Event", "Worst_Jump_Event"])
+        writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
+        writer.writerow(["MMSI", "DFSI_Score", "Max_Gap_Event", "Worst_Draught_Change_Event", "Worst_Jump_Event"])
         for row in top5:
             writer.writerow([row["MMSI"],
                              f"{row['DFSI_Score']:.4f}",
                              row["Max_Gap_Event"],
+                             row["Worst_Draught_Change_Event"],
                              row["Worst_Jump_Event"]])
             
     total_vessels = len(global_results) # Just for interest, total number of ships processed.

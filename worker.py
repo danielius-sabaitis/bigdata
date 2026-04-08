@@ -129,7 +129,7 @@ def process_chunk(task):
             mmsi == m1 or mmsi == m2
             for (m1, m2) in pairwise_loitering
         ) 
-        draught_changes = anomaly_C.draught_changes_check(track)
+        draught_changes, max_draught_change_ratio, worst_draught_change_event = anomaly_C.draught_changes_check(track)
         has_anomaly_d, impossible_jump_nm, worst_jump_event = anomaly_D.impossible_jumps_check(track) 
 
         anomalies = {"A":going_dark, 
@@ -142,6 +142,8 @@ def process_chunk(task):
                          "max_gap_hours": max_gap_hours,
                          "max_gap_event": max_gap_event, 
                          "draught_changes": draught_changes, 
+                         "max_draught_change_ratio": max_draught_change_ratio, 
+                         "worst_draught_change_event": worst_draught_change_event, 
                          "impossible_jumps_nm": impossible_jump_nm, 
                          "worst_jump_event": worst_jump_event
                         }
