@@ -26,7 +26,10 @@ def impossible_jumps_check(track):
         # 0. Extract data for the two consecutive pings
         # use *_ to ignore the extra data - like SOG and Draught
         t1, lat1, lon1, *_ = track[i-1]
-        t2, lat2, lon2, *_ = track[i]
+        t2, lat2, lon2, _, _, carryover2 = track[i]
+        # to elim the overlap - if the destination point is a carryover, skip it
+        if carryover2:
+            continue
 
         # 1. Calculate time difference in h
         # .total_seconds() gets the exact time gap, then divide by 3600 to get h
@@ -59,6 +62,5 @@ def impossible_jumps_check(track):
                 )
 
     # 6. Final Result: If we found at least 1 jump, Anomaly D is triggered
-    has_anomaly_d = 1 if impossible_jumps_count > 0 else 0
     
-    return has_anomaly_d, total_jump_distance_nm, worst_jump_event
+    return impossible_jumps_count, total_jump_distance_nm, worst_jump_event
