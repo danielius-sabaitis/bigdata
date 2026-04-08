@@ -35,7 +35,7 @@ def going_dark_check(track):
                 max_gap_hours = gap_hours
                 max_gap_event = (
                     f"[{t1}] Lat: {lat1}, Lon: {lon1} ---> [{t2}] Lat: {lat2}, Lon: {lon2} | "
-                    f"(Blackout gap: {gap_hours:.2f} h; Travel distance: {distance_nm * 1.852:.1f} km)"
+                    f"(Longest blackout: {gap_hours:.2f} h; Travel distance: {distance_nm * 1.852:.1f} km)"
                 )
 
     return count, max_gap_hours, max_gap_event
