@@ -73,3 +73,5 @@ Outputs are saved to *final_results.csv* and *top_suspicious_vessels.csv*.
 Group members:
 - Justina Pečiulytė, justina.peciulyte@mif.stud.vu.lt
 - Danielius Sabaitis, danielius.sabaitis@mif.stud.vu.lt
+- Kipras Zenkevičius, kipras.zenkevicius@mif.stud.vu.lt
+- Ieva Vaškelytė, ieva.vaskelyte@mif.stud.vu.lt
