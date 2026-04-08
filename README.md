@@ -24,7 +24,7 @@ Required data fields for analysis:
 **Project architecture:**
 ---
 
-<img src="./project_diagram.drawio.svg">
+<img src="./docs/project_diagram.drawio.svg">
 
 - ```reader.py```  
   Reads large input AIS CSV files in chunks and creates tasks which are distributed across workers.
