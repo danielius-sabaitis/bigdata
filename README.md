@@ -33,10 +33,16 @@ Required data fields for analysis:
   Groups rows by vessel (MMSI) and performs data validation by checking for invalid MMSI, coordinates outside of the Baltic sea, and skipping non-commercial ships. Then, applies anomaly detection modules and gathers results for each vessel.
 
 - Anomaly detection modules:
-    - ```anomaly_A.py```
-    - ```anomaly_B.py```
-    - ```anomaly_C.py```
-    - ```anomaly_D.py```
+    - ```anomaly_A.py``` - **"Going Dark"**
+      Detects gaps longer than 4 hours between AIS where the vessel appears to have continued moving. The module uses geographic distance between consecutive pings to identify suspicious periods.
+    - ```anomaly_B.py``` - **Loitering and Transfers**
+      Detects pairs of vessels moving close to each other and maintaining very slow speed for extended periods. 
+    - ```anomaly_C.py``` - **Draft Changes at Sea**
+      Identifies signifiant draught changes during AIS blackouts which indicate possible cargo transfers or unloading at sea.
+    - ```anomaly_D.py``` - **Identity Cloning/Teleportation**
+      Detects unrealistic vessel movement by using geographic distance between consecutive pings to calculate speed.
+
+  Each anomaly module analyzes vessel tracks and returns both quantitative metrics and a description of the most significant detected event. This allows to later examine the context of suspicious activity and provide an additional interpretation.
 
 - ```main.py```
   Controls multiprocessing, aggregates partial results received from workers, and writes output to CSV files. 
