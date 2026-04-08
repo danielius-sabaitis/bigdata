@@ -144,12 +144,12 @@ def process_chunk(task):
         going_dark, max_gap_hours, max_gap_event = anomaly_A.going_dark_check(track)
         loitering = mmsi in loitering_detected
         draught_changes, max_draught_change_ratio, worst_draught_change_event = anomaly_C.draught_changes_check(track)
-        has_anomaly_d, impossible_jump_nm, worst_jump_event = anomaly_D.impossible_jumps_check(track) 
+        impossible_jumps_count, impossible_jump_nm, worst_jump_event = anomaly_D.impossible_jumps_check(track) 
 
         anomalies = {"A":going_dark, 
                      "B":loitering, 
                      "C":draught_changes,
-                     "D":has_anomaly_d, 
+                     "D":impossible_jumps_count, 
         }
 
         results[mmsi] = {"anomalies": anomalies,
