@@ -4,7 +4,7 @@
 
 This project processes large AIS vessel datasets to detect anomalies in vessel behavior. The system reads large CSV datasets in chunks, distributes processing across workers, and applies anomaly detection logic to identify suspicious vessel data. The final output aggregates anomaly counts and computes a Shadow Fleet Suspicion Index (DFSI) per vessel (MMSI).
 
-**Input Data**
+**Input data**
 
 Dataset used: [Danish Maritime Authority AIS data](http://aisdata.ais.dk/)
 
@@ -21,7 +21,7 @@ Required data fields for analysis:
  - SOG
  - Draught
 
-**Project Architecture and Module Description:**
+**Project architecture and module description:**
 ---
 
 <img src="./docs/project_diagram.drawio.svg">
@@ -68,6 +68,11 @@ python main.py
 ```
 
 Outputs are saved to *final_results.csv* and *top_suspicious_vessels.csv*.
+
+**Artificial Intelligence usage disclosure:**
+---
+
+AI was used to refine various aspects of the main pipeline code, as well as to create the rule-based filtering optimization in Anomaly B and Amdahl's Law theoretical speedup calculations from scratch.
 
 ---
 Group members:
