@@ -1,4 +1,4 @@
-import haversine_dist
+from haversine_dist import haversine_distance
 
 # Anomaly D: Impossible travel speed showing Identity Cloning; Commercial ships cannot travel faster than threshold
 SPEED_THRESHOLD_KNOTS = 60.0
@@ -33,7 +33,7 @@ def impossible_jumps_check(track):
         time_diff_hours = (t2 - t1).total_seconds() / 3600.0
 
         # 2. Calculate true Earth distance in nautical miles using haversine_dist
-        distance_nm = haversine_dist.haversine_distance(lat1, lon1, lat2, lon2)
+        distance_nm = haversine_distance(lat1, lon1, lat2, lon2)
 
         # 3. Edge cases: If two pings happen at the exact same second, we cannot divide by zero
         if time_diff_hours == 0:
@@ -53,7 +53,10 @@ def impossible_jumps_check(track):
             # Save coordinates only if this is the longest jump
             if distance_nm > max_single_jump:
                 max_single_jump = distance_nm
-                worst_jump_event = f"[{t1}] Lat: {lat1}, Lon: {lon1} ---> [{t2}] Lat: {lat2}, Lon: {lon2} ({distance_nm:.1f} NM)"
+                worst_jump_event = (
+                    f"[{t1}] Lat: {lat1}, Lon: {lon1} ---> [{t2}] Lat: {lat2}, Lon: {lon2} | "
+                    f"(Longest jump distance: {distance_nm * 1.852:.1f} km)"
+                )
 
     # 6. Final Result: If we found at least 1 jump, Anomaly D is triggered
     has_anomaly_d = 1 if impossible_jumps_count > 0 else 0
