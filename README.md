@@ -21,7 +21,7 @@ Required data fields for analysis:
  - SOG
  - Draught
 
-**Project architecture:**
+**Project Architecture and Module Description:**
 ---
 
 <img src="./docs/project_diagram.drawio.svg">
@@ -42,7 +42,7 @@ Required data fields for analysis:
     - ```anomaly_D.py``` - **Identity Cloning/Teleportation**
       Detects unrealistic vessel movement by using geographic distance between consecutive pings to calculate speed.
 
-  Each anomaly module analyzes vessel tracks and returns both quantitative metrics and a description of the most significant detected event. This allows to later examine the context of suspicious activity and provide an additional interpretation.
+  Each anomaly module analyzes vessel tracks and returns both quantitative metrics and a description of the most significant detected event. This allows to later examine the context of suspicious activity and provide an additional interpretation. 
 
 - ```main.py```
   Controls multiprocessing, aggregates partial results received from workers, and writes output to CSV files. 
